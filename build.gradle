@@ -1,0 +1,108 @@
+apply plugin: 'com.android.application'
+
+ext {
+    versionMajor = 1
+    versionMinor = 0
+}
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.6.3'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.nanohttpd:nanohttpd:2.1.1'
+    implementation 'com.nanohttpd:nanohttpd-websocket:2.1.1'
+    implementation 'de.greenrobot:eventbus:2.4.0'
+}
+
+android {
+
+    lintOptions {
+        abortOnError false
+    }
+
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+
+    defaultConfig {
+        applicationId "com.appspot.usbhidterminal"
+        minSdkVersion 21
+        targetSdkVersion 29
+        versionCode computeVersionCode()
+        versionName computeVersionName()
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+        androidTest.setRoot('tests')
+        androidTest.java.srcDirs = ['tests/src']
+    }
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES.txt'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/dependencies.txt'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/LGPL2.1'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/notice.txt'
+        exclude 'LICENSE.txt'
+    }
+}
+
+task adbConfig(type: Exec) {
+    commandLine 'adb', 'connect', '192.168.1.45:5555'
+}
+
+
+task tst(dependsOn: ['adbConfig', 'connectedAndroidTest']) {
+
+}
+
+def computeVersionName() {
+    // Basic <major>.<minor> version name
+    return String.format('%d.%d', versionMajor, versionMinor)
+}
+
+// Will return 120042 for Jenkins build #42
+def computeVersionCode() {
+    // Major + minor + Jenkins build number (where available)
+    return (versionMajor * 10) + (versionMinor * 10) + Integer.valueOf(System.env.BUILD_NUMBER ?: 0)
+}
